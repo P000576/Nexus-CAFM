@@ -1,0 +1,29 @@
+name: Generate SDKs
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run OpenAPI Generator (Docker)
+        uses: docker://openapitools/openapi-generator-cli:v6.6.0
+        with:
+          args: generate -i /github/workspace/openapi/project-nexus-core.yaml -g typescript-fetch -o /github/workspace/sdk/generated/typescript -c /github/workspace/openapi/generator/typescript-config.json --skip-validate-spec
+
+      - name: Generate Python SDK
+        uses: docker://openapitools/openapi-generator-cli:v6.6.0
+        with:
+          args: generate -i /github/workspace/openapi/project-nexus-core.yaml -g python -o /github/workspace/sdk/generated/python -c /github/workspace/openapi/generator/python-config.json --skip-validate-spec
+
+      - name: Upload generated SDK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-nexus-sdks
+          path: sdk/generated

@@ -1,0 +1,764 @@
+openapi: 3.0.3
+info:
+  title: Project Nexus - Core API
+  version: 0.1.0
+  description: |
+    Initial OpenAPI skeleton for Project Nexus core data objects (Buildings, Floors, Rooms, Employees, Assets, WorkOrders).
+    This is a minimal starting contract for backend services and integrations.
+servers:
+  - url: https://api.project-nexus.example.com/v1
+    description: Production (placeholder)
+  - url: https://staging.api.project-nexus.example.com/v1
+    description: Staging (placeholder)
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.example.com/oauth/token
+          scopes: {}
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Id:
+      type: string
+      format: uuid
+      description: Unique identifier (UUID)
+    Building:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        address:
+          type: string
+        grossAreaSqm:
+          type: number
+          format: float
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Floor:
+      type: object
+      required: [id, buildingId, level]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        buildingId:
+          $ref: '#/components/schemas/Id'
+        level:
+          type: string
+          description: Floor label or number (e.g., "1", "G", "Mezz")
+        grossAreaSqm:
+          type: number
+          format: float
+        planFileUrl:
+          type: string
+          format: uri
+    Room:
+      type: object
+      required: [id, floorId, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        floorId:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        number:
+          type: string
+        areaSqm:
+          type: number
+          format: float
+        capacity:
+          type: integer
+        department:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+    Employee:
+      type: object
+      required: [id, firstName, lastName, email]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+        assignedRoomId:
+          $ref: '#/components/schemas/Id'
+    Asset:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        assetTag:
+          type: string
+        manufacturer:
+          type: string
+        serialNumber:
+          type: string
+        location:
+          type: object
+          properties:
+            buildingId:
+              $ref: '#/components/schemas/Id'
+            floorId:
+              $ref: '#/components/schemas/Id'
+            roomId:
+              $ref: '#/components/schemas/Id'
+        warrantyExpiry:
+          type: string
+          format: date
+        qrCodeUrl:
+          type: string
+          format: uri
+    WorkOrder:
+      type: object
+      required: [id, title, status]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          description: e.g., Created, In Progress, Completed, Cancelled
+        priority:
+          type: string
+          enum: [Low, Medium, High, Critical]
+        requestedBy:
+          $ref: '#/components/schemas/Id'
+        assignedTo:
+          $ref: '#/components/schemas/Id'
+        assetId:
+          $ref: '#/components/schemas/Id'
+        location:
+          type: object
+          properties:
+            buildingId:
+              $ref: '#/components/schemas/Id'
+            floorId:
+              $ref: '#/components/schemas/Id'
+            roomId:
+              $ref: '#/components/schemas/Id'
+        createdAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date
+        laborCost:
+          type: number
+          format: double
+        partsCost:
+          type: number
+          format: double
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Current page number (1-based)
+        size:
+          type: integer
+          description: Page size
+        total:
+          type: integer
+          description: Total number of items available
+        totalPages:
+          type: integer
+          description: Total number of pages
+    PaginatedBuildings:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Building'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    PaginatedWorkOrders:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrder'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+paths:
+  /buildings:
+    get:
+      tags: [Buildings]
+      summary: List buildings
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number (1-based)
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 25
+          description: Page size
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Free-text search across building name/address
+        - in: query
+          name: sort
+          schema:
+            type: string
+          description: Sort expression, e.g. "name:asc" or "grossAreaSqm:desc"
+      responses:
+        '200':
+          description: A paginated list of buildings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBuildings'
+              examples:
+                sample:
+                  summary: Single building result
+                  value:
+                    items:
+                      - id: "11111111-1111-1111-1111-111111111111"
+                        name: "Headquarters"
+                        address: "1 Main St, City, Country"
+                        grossAreaSqm: 12000.5
+                        metadata:
+                          timezone: "Europe/London"
+                        createdAt: "2025-09-01T12:00:00Z"
+                        updatedAt: "2025-09-15T09:30:00Z"
+                    pagination:
+                      page: 1
+                      size: 25
+                      total: 1
+                      totalPages: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Buildings]
+      summary: Create a building
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Building'
+            examples:
+              sample:
+                summary: Create building example
+                value:
+                  name: "Regional Office"
+                  address: "200 River Rd, City, Country"
+                  grossAreaSqm: 4500.0
+                  metadata:
+                    timezone: "Europe/London"
+      responses:
+        '201':
+          description: Building created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+  /buildings/{buildingId}:
+    parameters:
+      - in: path
+        name: buildingId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+    get:
+      tags: [Buildings]
+      summary: Get a building by id
+      responses:
+        '200':
+          description: Building
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Buildings]
+      summary: Update a building
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Building'
+            examples:
+              sample:
+                summary: Update building example
+                value:
+                  id: "11111111-1111-1111-1111-111111111111"
+                  name: "Headquarters - Renovated"
+                  address: "1 Main St, City, Country"
+                  grossAreaSqm: 12500.0
+      responses:
+        '200':
+          description: Updated building
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+    delete:
+      tags: [Buildings]
+      summary: Delete a building
+      responses:
+        '204':
+          description: Deleted
+
+  /buildings/{buildingId}/floors:
+    get:
+      tags: [Floors]
+      summary: List floors for a building
+      parameters:
+        - in: path
+          name: buildingId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Floors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Floor'
+    post:
+      tags: [Floors]
+      summary: Create a floor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Floor'
+      responses:
+        '201':
+          description: Floor created
+
+  /buildings/{buildingId}/floors/{floorId}/rooms:
+    get:
+      tags: [Rooms]
+      summary: List rooms for a floor
+      parameters:
+        - in: path
+          name: buildingId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+        - in: path
+          name: floorId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+      responses:
+        '200':
+          description: Rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+    post:
+      tags: [Rooms]
+      summary: Create a room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+      responses:
+        '201':
+          description: Room created
+
+  /employees:
+    get:
+      tags: [Employees]
+      summary: List employees
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 25
+        - in: query
+          name: department
+          schema:
+            type: string
+          description: Filter by department name
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Free-text search across firstName, lastName, email
+      responses:
+        '200':
+          description: Paginated employees list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Employee'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              examples:
+                sample:
+                  summary: Employee list sample
+                  value:
+                    items:
+                      - id: "22222222-2222-2222-2222-222222222222"
+                        firstName: "Aisha"
+                        lastName: "Khan"
+                        email: "aisha.khan@example.com"
+                        department: "Facilities"
+                        role: "Facility Manager"
+                        assignedRoomId: "33333333-3333-3333-3333-333333333333"
+                    pagination:
+                      page: 1
+                      size: 25
+                      total: 1
+                      totalPages: 1
+    post:
+      tags: [Employees]
+      summary: Create employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+      responses:
+        '201':
+          description: Employee created
+
+  /employees/{employeeId}:
+    parameters:
+      - in: path
+        name: employeeId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+    get:
+      tags: [Employees]
+      summary: Get employee by id
+      responses:
+        '200':
+          description: Employee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: Not Found
+    put:
+      tags: [Employees]
+      summary: Update employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+      responses:
+        '200':
+          description: Employee updated
+
+  /assets:
+    get:
+      tags: [Assets]
+      summary: List assets
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 25
+        - in: query
+          name: location.roomId
+          schema:
+            type: string
+          description: Filter assets by room id
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search by asset name, assetTag, serialNumber
+      responses:
+        '200':
+          description: Paginated assets list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Asset'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              examples:
+                sample:
+                  summary: Asset list sample
+                  value:
+                    items:
+                      - id: "44444444-4444-4444-4444-444444444444"
+                        name: "Air Handling Unit"
+                        assetTag: "AHU-1001"
+                        manufacturer: "ACME HVAC"
+                        serialNumber: "SN-AHU-1001"
+                        location:
+                          buildingId: "11111111-1111-1111-1111-111111111111"
+                          floorId: "55555555-5555-5555-5555-555555555555"
+                          roomId: "66666666-6666-6666-6666-666666666666"
+                        warrantyExpiry: "2027-08-01"
+                        qrCodeUrl: "https://assets.example.com/qr/44444444"
+                    pagination:
+                      page: 1
+                      size: 25
+                      total: 1
+                      totalPages: 1
+    post:
+      tags: [Assets]
+      summary: Create an asset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Asset'
+      responses:
+        '201':
+          description: Asset created
+
+  /assets/{assetId}:
+    parameters:
+      - in: path
+        name: assetId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+    get:
+      tags: [Assets]
+      summary: Get asset by id
+      responses:
+        '200':
+          description: Asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+    put:
+      tags: [Assets]
+      summary: Update asset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Asset'
+      responses:
+        '200':
+          description: Asset updated
+
+  /workorders:
+    get:
+      tags: [WorkOrders]
+      summary: List work orders
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 25
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Filter by status (Created, In Progress, Completed, Cancelled)
+        - in: query
+          name: assignedTo
+          schema:
+            type: string
+          description: Filter by assigned technician id
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Free-text search across title/description
+      responses:
+        '200':
+          description: Paginated work orders list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWorkOrders'
+              examples:
+                sample:
+                  summary: Sample work order list
+                  value:
+                    items:
+                      - id: "77777777-7777-7777-7777-777777777777"
+                        title: "Fix leaking valve"
+                        description: "Leak in AHU supply line"
+                        status: "Created"
+                        priority: "High"
+                        requestedBy: "22222222-2222-2222-2222-222222222222"
+                        assignedTo: null
+                        assetId: "44444444-4444-4444-4444-444444444444"
+                        location:
+                          buildingId: "11111111-1111-1111-1111-111111111111"
+                          floorId: "55555555-5555-5555-5555-555555555555"
+                          roomId: "66666666-6666-6666-6666-666666666666"
+                        createdAt: "2025-10-06T08:15:00Z"
+                        dueDate: "2025-10-10"
+                        laborCost: 0
+                        partsCost: 0
+                    pagination:
+                      page: 1
+                      size: 25
+                      total: 1
+                      totalPages: 1
+    post:
+      tags: [WorkOrders]
+      summary: Create a work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrder'
+      responses:
+        '201':
+          description: Work order created
+
+  /workorders/{workOrderId}:
+    parameters:
+      - in: path
+        name: workOrderId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
+    get:
+      tags: [WorkOrders]
+      summary: Get work order by id
+      responses:
+        '200':
+          description: Work order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '404':
+          description: Not Found
+    put:
+      tags: [WorkOrders]
+      summary: Update work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrder'
+      responses:
+        '200':
+          description: Work order updated
+
+components:
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+security:
+  - OAuth2: []
+
+tags:
+  - name: Buildings
+    description: Manage buildings and their metadata
+  - name: Floors
+    description: Manage floors within buildings
+  - name: Rooms
+    description: Manage rooms and occupancy
+  - name: Employees
+    description: Employee directory and assignments
+  - name: Assets
+    description: Asset registry and lifecycle
+  - name: WorkOrders
+    description: Maintenance work orders and service requests

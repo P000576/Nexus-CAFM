@@ -1,0 +1,17 @@
+{
+  "name": "project-nexus-client",
+  "version": "0.1.0",
+  "description": "TypeScript client SDK for Project Nexus (core API)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "echo 'Add linter'"
+  },
+  "keywords": ["project-nexus", "iwms", "sdk"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

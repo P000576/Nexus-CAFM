@@ -1,0 +1,9 @@
+{
+  "npmName": "@project-nexus/client",
+  "npmVersion": "0.1.0",
+  "supportsES6": true,
+  "modelPropertyNaming": "camelCase",
+  "enumPropertyNaming": "PascalCase",
+  "typescriptThreePlus": true,
+  "prettier": true
+}
