@@ -16,3 +16,16 @@ console.log(buildings);
 Notes:
 - This is a starting point. You may want to generate a full SDK using OpenAPI Generator or expand the models/types.
 - Run `npm install` and `npm run build` to compile.
+Install dependencies:
+
+```powershell
+npm install node-fetch@2 @types/node-fetch --save
+npm install
+npm run build
+```
+
+Example (quick run with ts-node):
+
+```powershell
+npx ts-node src/examples.ts
+```

@@ -40,6 +40,68 @@ export class ProjectNexusClient {
     return res.json();
   }
 
+  async getBuilding(id: string) {
+    const res = await fetch(`${this.baseUrl}/buildings/${id}`, { headers: this.headers() });
+    return res.json();
+  }
+
+  async deleteBuilding(id: string) {
+    const res = await fetch(`${this.baseUrl}/buildings/${id}`, { method: 'DELETE', headers: this.headers() });
+    return res.status === 204;
+  }
+
+  // Employees
+  async listEmployees(params: { page?: number; size?: number; department?: string; q?: string } = {}) {
+    const qs = new URLSearchParams();
+    if (params.page) qs.set('page', String(params.page));
+    if (params.size) qs.set('size', String(params.size));
+    if (params.department) qs.set('department', params.department);
+    if (params.q) qs.set('q', params.q);
+    const res = await fetch(`${this.baseUrl}/employees?${qs.toString()}`, { headers: this.headers() });
+    return res.json();
+  }
+
+  async createEmployee(e: Employee) {
+    const res = await fetch(`${this.baseUrl}/employees`, { method: 'POST', headers: this.headers(), body: JSON.stringify(e) });
+    return res.json();
+  }
+
+  async getEmployee(id: string) {
+    const res = await fetch(`${this.baseUrl}/employees/${id}`, { headers: this.headers() });
+    return res.json();
+  }
+
+  async updateEmployee(id: string, e: Employee) {
+    const res = await fetch(`${this.baseUrl}/employees/${id}`, { method: 'PUT', headers: this.headers(), body: JSON.stringify(e) });
+    return res.json();
+  }
+
+  // Assets
+  async getAssets(params: { page?: number; size?: number; roomId?: string; q?: string } = {}) {
+    const qs = new URLSearchParams();
+    if (params.page) qs.set('page', String(params.page));
+    if (params.size) qs.set('size', String(params.size));
+    if (params.roomId) qs.set('location.roomId', params.roomId);
+    if (params.q) qs.set('q', params.q);
+    const res = await fetch(`${this.baseUrl}/assets?${qs.toString()}`, { headers: this.headers() });
+    return res.json();
+  }
+
+  async createAsset(a: Asset) {
+    const res = await fetch(`${this.baseUrl}/assets`, { method: 'POST', headers: this.headers(), body: JSON.stringify(a) });
+    return res.json();
+  }
+
+  async getAsset(id: string) {
+    const res = await fetch(`${this.baseUrl}/assets/${id}`, { headers: this.headers() });
+    return res.json();
+  }
+
+  async updateAsset(id: string, a: Asset) {
+    const res = await fetch(`${this.baseUrl}/assets/${id}`, { method: 'PUT', headers: this.headers(), body: JSON.stringify(a) });
+    return res.json();
+  }
+
   async listWorkOrders(params: { page?: number; size?: number; status?: string; assignedTo?: string; q?: string } = {}) {
     const qs = new URLSearchParams();
     if (params.page) qs.set('page', String(params.page));
