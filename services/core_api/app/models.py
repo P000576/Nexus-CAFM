@@ -50,3 +50,45 @@ class WorkOrder(BaseModel):
     assetId: Optional[str]
     description: str
     status: Optional[str] = "New"
+
+class Permission(BaseModel):
+    id: Optional[str]
+    name: str
+    description: Optional[str]
+    module: str  # "buildings", "employees", "assets", etc
+    action: str  # "create", "read", "update", "delete"
+    fieldLevel: Optional[bool] = False
+
+class Role(BaseModel):
+    id: Optional[str]
+    name: str
+    description: Optional[str]
+    permissions: Optional[List[Permission]] = []
+
+class User(BaseModel):
+    id: Optional[str]
+    username: str
+    email: str
+    firstName: Optional[str]
+    lastName: Optional[str]
+    active: Optional[bool] = True
+    licenseLevel: Optional[str] = "Self-Service"  # Self-Service, Work Process, Analysis, Process Owner
+    roles: Optional[List[Role]] = []
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    firstName: Optional[str]
+    lastName: Optional[str]
+
+class RoleCreate(BaseModel):
+    name: str
+    description: Optional[str]
+
+class PermissionCreate(BaseModel):
+    name: str
+    description: Optional[str]
+    module: str
+    action: str
+    fieldLevel: Optional[bool] = False

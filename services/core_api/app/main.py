@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import buildings, floors, rooms, employees, assets, workorders
+from app.routers import buildings, floors, rooms, employees, assets, workorders, users, roles, permissions
 from app.database import init_db
 
 app = FastAPI(
@@ -19,6 +19,13 @@ app.include_router(rooms.router)
 app.include_router(employees.router)
 app.include_router(assets.router)
 app.include_router(workorders.router)
+app.include_router(users.router)
+app.include_router(roles.router)
+app.include_router(permissions.router)
+
+@app.get("/")
+def read_root():
+    return {"message": "Project Nexus Core API", "docs": "/docs"}
 
 @app.get("/")
 def read_root():
