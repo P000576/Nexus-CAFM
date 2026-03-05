@@ -21,6 +21,10 @@ uvicorn app.main:app --reload
 
 The API will be available at `http://localhost:8000` with auto-generated docs at `/docs`.
 
+### Authentication
+- Obtain token: POST `/login` with form data `username` and `password`
+- Use returned bearer token for subsequent requests (`Authorization: Bearer <token>`)
+
 ## Database
 
 - Uses SQLite for local development/testing

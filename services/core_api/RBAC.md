@@ -42,9 +42,15 @@ The system creates four default roles on initialization:
 
 ## API Endpoints
 
-### User Management
+### Authentication
 ```
-POST   /users                      # Create user
+POST   /login                      # Obtain JWT access token (form data: username,password)
+GET    /me                         # Retrieve current user (requires Bearer token)
+```
+
+### User Management (protected)
+```
+POST   /users                      # Create user (requires auth)
 GET    /users                      # List all users
 GET    /users/{user_id}            # Get user details
 PUT    /users/{user_id}            # Update user
@@ -52,7 +58,6 @@ DELETE /users/{user_id}            # Delete user
 POST   /users/{user_id}/roles/{role_id}    # Assign role
 DELETE /users/{user_id}/roles/{role_id}    # Remove role
 ```
-
 ### Role Management
 ```
 POST   /roles                      # Create role

@@ -8,6 +8,11 @@ app = FastAPI(
     description="Core platform backend for Project Nexus",
 )
 
+# secret key for JWT; in production this should come from environment
+JWT_SECRET_KEY = "supersecretprojectnexuskey"
+JWT_ALGORITHM = "HS256"
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 60*24  # 1 day
+
 # Initialize database on startup
 @app.on_event("startup")
 def startup_event():
