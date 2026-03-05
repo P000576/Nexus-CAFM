@@ -6,13 +6,18 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "echo 'Add linter'"
+    "test": "echo 'Add tests'",
+    "prepublish": "npm run build"
   },
   "keywords": ["project-nexus", "iwms", "sdk"],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
   }
 }
 
