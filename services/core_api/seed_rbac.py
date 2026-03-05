@@ -35,7 +35,7 @@ def seed_permissions():
         
         db.add_all(permissions)
         db.commit()
-        print(f"✓ Created {len(permissions)} default permissions")
+        print(f"[OK] Created {len(permissions)} default permissions")
         
     finally:
         db.close()
@@ -109,7 +109,7 @@ def seed_roles():
             db.add(role)
         
         db.commit()
-        print(f"✓ Created {len(roles_config)} default roles (license levels)")
+        print(f"[OK] Created {len(roles_config)} default roles (license levels)")
         
     finally:
         db.close()
@@ -117,7 +117,7 @@ def seed_roles():
 if __name__ == "__main__":
     print("Initializing database...")
     init_db()
-    print("✓ Database schema created\n")
+    print("[OK] Database schema created\n")
     
     print("Seeding default permissions...")
     seed_permissions()

@@ -7,6 +7,7 @@ Run after seed_rbac.py:
   python seed_settings.py
 """
 
+import uuid
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, init_db
 from app.models_orm import SystemSettingORM
@@ -126,6 +127,7 @@ def seed_settings(db: Session):
         else:
             # Create new setting
             new_setting = SystemSettingORM(
+                id=str(uuid.uuid4()),
                 key=setting_data["key"],
                 value=setting_data["value"],
                 description=setting_data["description"]
@@ -146,6 +148,6 @@ if __name__ == "__main__":
     db = SessionLocal()
     try:
         seed_settings(db)
-        print("\n✓ System settings initialization complete!")
+        print("\n[OK] System settings initialization complete!")
     finally:
         db.close()
