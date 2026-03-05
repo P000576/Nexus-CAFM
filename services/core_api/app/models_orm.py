@@ -25,7 +25,7 @@ class BuildingORM(Base):
     name = Column(String, nullable=False)
     address = Column(String, nullable=True)
     grossAreaSqm = Column(Float, nullable=True)
-    metadata = Column(String, nullable=True)  # JSON stored as string
+    customMetadata = Column(String, nullable=True)  # JSON stored as string
 
     floors = relationship("FloorORM", back_populates="building")
 
@@ -51,7 +51,7 @@ class RoomORM(Base):
     areaSqm = Column(Float, nullable=True)
     capacity = Column(Integer, nullable=True)
     department = Column(String, nullable=True)
-    metadata = Column(String, nullable=True)
+    customMetadata = Column(String, nullable=True)
 
     floor = relationship("FloorORM", back_populates="rooms")
 
@@ -89,7 +89,8 @@ class WorkOrderORM(Base):
 class SystemSettingORM(Base):
     __tablename__ = "system_settings"
 
-    key = Column(String, primary_key=True)
+    id = Column(String, primary_key=True)
+    key = Column(String, nullable=False, unique=True)
     value = Column(String, nullable=False)
     description = Column(String, nullable=True)
 

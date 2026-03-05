@@ -6,7 +6,7 @@ import jwt
 
 from app.database import get_db
 from app.models_orm import UserORM
-from app.main import JWT_SECRET_KEY, JWT_ALGORITHM, JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+from app.config import JWT_SECRET_KEY, JWT_ALGORITHM, JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 
 # password hashing
 from passlib.context import CryptContext

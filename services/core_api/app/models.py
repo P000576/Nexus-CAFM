@@ -9,7 +9,7 @@ class Building(BaseModel):
     name: str
     address: Optional[str]
     grossAreaSqm: Optional[float]
-    metadata: Optional[dict] = {}
+    customMetadata: Optional[dict] = {}
 
 class Floor(BaseModel):
     id: Optional[str]
@@ -26,7 +26,7 @@ class Room(BaseModel):
     areaSqm: Optional[float]
     capacity: Optional[int]
     department: Optional[str]
-    metadata: Optional[dict] = {}
+    customMetadata: Optional[dict] = {}
 
 class Employee(BaseModel):
     id: Optional[str]
@@ -76,6 +76,7 @@ class User(BaseModel):
     roles: Optional[List[Role]] = []
 
 class SystemSetting(BaseModel):
+    id: Optional[str] = None
     key: str
     value: str
     description: Optional[str] = None

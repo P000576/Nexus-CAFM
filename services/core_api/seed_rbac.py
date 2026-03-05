@@ -17,7 +17,7 @@ def seed_permissions():
         db.query(PermissionORM).delete()
         db.commit()
         
-        modules = ["buildings", "floors", "rooms", "employees", "assets", "workorders", "users", "roles", "permissions"]
+        modules = ["buildings", "floors", "rooms", "employees", "assets", "workorders", "users", "roles", "permissions", "settings"]
         actions = ["create", "read", "update", "delete"]
         
         permissions = []
@@ -87,7 +87,8 @@ def seed_roles():
                     "workorders:create", "workorders:read", "workorders:update", "workorders:delete",
                     "users:create", "users:read", "users:update", "users:delete",
                     "roles:create", "roles:read", "roles:update", "roles:delete",
-                    "permissions:create", "permissions:read", "permissions:update", "permissions:delete"
+                    "permissions:create", "permissions:read", "permissions:update", "permissions:delete",
+                    "settings:create", "settings:read", "settings:update", "settings:delete"
                 ]
             }
         ]
