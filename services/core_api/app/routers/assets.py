@@ -1,41 +1,63 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from uuid import uuid4
+from sqlalchemy.orm import Session
 
 from app.models import Asset
+from app.models_orm import AssetORM
+from app.database import get_db
 
 router = APIRouter()
 
-_assets = {}
-
 @router.post("/assets", response_model=Asset)
-def create_asset(a: Asset):
+def create_asset(a: Asset, db: Session = Depends(get_db)):
     if not a.id:
         a.id = str(uuid4())
-    _assets[a.id] = a
-    return a
+    
+    db_asset = AssetORM(
+        id=a.id,
+        name=a.name,
+        assetTag=a.assetTag,
+        manufacturer=a.manufacturer,
+        serialNumber=a.serialNumber
+    )
+    db.add(db_asset)
+    db.commit()
+    db.refresh(db_asset)
+    return Asset(**db_asset.__dict__)
 
 @router.get("/assets", response_model=List[Asset])
-def list_assets():
-    return list(_assets.values())
+def list_assets(db: Session = Depends(get_db)):
+    assets = db.query(AssetORM).all()
+    return [Asset(**a.__dict__) for a in assets]
 
 @router.get("/assets/{asset_id}", response_model=Asset)
-def get_asset(asset_id: str):
-    if asset_id not in _assets:
+def get_asset(asset_id: str, db: Session = Depends(get_db)):
+    asset = db.query(AssetORM).filter(AssetORM.id == asset_id).first()
+    if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    return _assets[asset_id]
+    return Asset(**asset.__dict__)
 
 @router.put("/assets/{asset_id}", response_model=Asset)
-def update_asset(asset_id: str, a: Asset):
-    if asset_id not in _assets:
+def update_asset(asset_id: str, a: Asset, db: Session = Depends(get_db)):
+    asset = db.query(AssetORM).filter(AssetORM.id == asset_id).first()
+    if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    a.id = asset_id
-    _assets[asset_id] = a
-    return a
+    
+    asset.name = a.name
+    asset.assetTag = a.assetTag
+    asset.manufacturer = a.manufacturer
+    asset.serialNumber = a.serialNumber
+    
+    db.commit()
+    db.refresh(asset)
+    return Asset(**asset.__dict__)
 
 @router.delete("/assets/{asset_id}")
-def delete_asset(asset_id: str):
-    if asset_id not in _assets:
+def delete_asset(asset_id: str, db: Session = Depends(get_db)):
+    asset = db.query(AssetORM).filter(AssetORM.id == asset_id).first()
+    if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    del _assets[asset_id]
+    db.delete(asset)
+    db.commit()
     return {"ok": True}

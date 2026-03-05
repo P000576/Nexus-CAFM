@@ -1,41 +1,69 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from uuid import uuid4
+from sqlalchemy.orm import Session
 
 from app.models import Room
+from app.models_orm import RoomORM
+from app.database import get_db
 
 router = APIRouter()
 
-_rooms = {}
-
 @router.post("/rooms", response_model=Room)
-def create_room(r: Room):
+def create_room(r: Room, db: Session = Depends(get_db)):
     if not r.id:
         r.id = str(uuid4())
-    _rooms[r.id] = r
-    return r
+    
+    db_room = RoomORM(
+        id=r.id,
+        floorId=r.floorId,
+        name=r.name,
+        number=r.number,
+        areaSqm=r.areaSqm,
+        capacity=r.capacity,
+        department=r.department,
+        metadata=str(r.metadata) if r.metadata else None
+    )
+    db.add(db_room)
+    db.commit()
+    db.refresh(db_room)
+    return Room(**db_room.__dict__)
 
 @router.get("/rooms", response_model=List[Room])
-def list_rooms():
-    return list(_rooms.values())
+def list_rooms(db: Session = Depends(get_db)):
+    rooms = db.query(RoomORM).all()
+    return [Room(**r.__dict__) for r in rooms]
 
 @router.get("/rooms/{room_id}", response_model=Room)
-def get_room(room_id: str):
-    if room_id not in _rooms:
+def get_room(room_id: str, db: Session = Depends(get_db)):
+    room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
+    if not room:
         raise HTTPException(status_code=404, detail="Room not found")
-    return _rooms[room_id]
+    return Room(**room.__dict__)
 
 @router.put("/rooms/{room_id}", response_model=Room)
-def update_room(room_id: str, r: Room):
-    if room_id not in _rooms:
+def update_room(room_id: str, r: Room, db: Session = Depends(get_db)):
+    room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
+    if not room:
         raise HTTPException(status_code=404, detail="Room not found")
-    r.id = room_id
-    _rooms[room_id] = r
-    return r
+    
+    room.floorId = r.floorId
+    room.name = r.name
+    room.number = r.number
+    room.areaSqm = r.areaSqm
+    room.capacity = r.capacity
+    room.department = r.department
+    room.metadata = str(r.metadata) if r.metadata else None
+    
+    db.commit()
+    db.refresh(room)
+    return Room(**room.__dict__)
 
 @router.delete("/rooms/{room_id}")
-def delete_room(room_id: str):
-    if room_id not in _rooms:
+def delete_room(room_id: str, db: Session = Depends(get_db)):
+    room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
+    if not room:
         raise HTTPException(status_code=404, detail="Room not found")
-    del _rooms[room_id]
+    db.delete(room)
+    db.commit()
     return {"ok": True}
