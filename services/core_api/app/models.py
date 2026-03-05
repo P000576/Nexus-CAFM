@@ -75,6 +75,11 @@ class User(BaseModel):
     licenseLevel: Optional[str] = "Self-Service"  # Self-Service, Work Process, Analysis, Process Owner
     roles: Optional[List[Role]] = []
 
+class SystemSetting(BaseModel):
+    key: str
+    value: str
+    description: Optional[str] = None
+
 class UserCreate(BaseModel):
     username: str
     email: str

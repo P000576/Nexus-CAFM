@@ -78,6 +78,25 @@ PUT    /permissions/{permission_id} # Update permission
 DELETE /permissions/{permission_id} # Delete permission
 ```
 
+### System Settings & Terminology (ADM-03)
+```
+POST   /settings                   # Create global system setting
+GET    /settings                   # List all settings
+PUT    /settings/{key}             # Update a setting
+DELETE /settings/{key}             # Remove a setting
+```
+
+## Permission Enforcement
+All protected endpoints require a valid JWT token. Additional module/action permissions are enforced via the `require_permission(module, action)` dependency defined in `app/auth.py`. Example:
+
+```python
+@router.get("/buildings", dependencies=[Depends(require_permission("buildings","read"))])
+def list_buildings(...):
+    ...
+```
+
+Permissions are checked against every role assigned to the current user; a single matching permission grants access.
+
 ## Getting Started
 
 ### 1. Install Dependencies

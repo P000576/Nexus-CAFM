@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 from app.models import WorkOrder
 from app.models_orm import WorkOrderORM
 from app.database import get_db
+from app.auth import require_permission
 
 router = APIRouter()
 
-@router.post("/workorders", response_model=WorkOrder)
+@router.post("/workorders", response_model=WorkOrder, dependencies=[Depends(require_permission("workorders","create"))])
 def create_workorder(w: WorkOrder, db: Session = Depends(get_db)):
     if not w.id:
         w.id = str(uuid4())
@@ -25,19 +26,19 @@ def create_workorder(w: WorkOrder, db: Session = Depends(get_db)):
     db.refresh(db_workorder)
     return WorkOrder(**db_workorder.__dict__)
 
-@router.get("/workorders", response_model=List[WorkOrder])
+@router.get("/workorders", response_model=List[WorkOrder], dependencies=[Depends(require_permission("workorders","read"))])
 def list_workorders(db: Session = Depends(get_db)):
     workorders = db.query(WorkOrderORM).all()
     return [WorkOrder(**w.__dict__) for w in workorders]
 
-@router.get("/workorders/{workorder_id}", response_model=WorkOrder)
+@router.get("/workorders/{workorder_id}", response_model=WorkOrder, dependencies=[Depends(require_permission("workorders","read"))])
 def get_workorder(workorder_id: str, db: Session = Depends(get_db)):
     workorder = db.query(WorkOrderORM).filter(WorkOrderORM.id == workorder_id).first()
     if not workorder:
         raise HTTPException(status_code=404, detail="WorkOrder not found")
     return WorkOrder(**workorder.__dict__)
 
-@router.put("/workorders/{workorder_id}", response_model=WorkOrder)
+@router.put("/workorders/{workorder_id}", response_model=WorkOrder, dependencies=[Depends(require_permission("workorders","update"))])
 def update_workorder(workorder_id: str, w: WorkOrder, db: Session = Depends(get_db)):
     workorder = db.query(WorkOrderORM).filter(WorkOrderORM.id == workorder_id).first()
     if not workorder:
@@ -51,7 +52,7 @@ def update_workorder(workorder_id: str, w: WorkOrder, db: Session = Depends(get_
     db.refresh(workorder)
     return WorkOrder(**workorder.__dict__)
 
-@router.delete("/workorders/{workorder_id}")
+@router.delete("/workorders/{workorder_id}", dependencies=[Depends(require_permission("workorders","delete"))])
 def delete_workorder(workorder_id: str, db: Session = Depends(get_db)):
     workorder = db.query(WorkOrderORM).filter(WorkOrderORM.id == workorder_id).first()
     if not workorder:

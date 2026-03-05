@@ -86,6 +86,13 @@ class WorkOrderORM(Base):
     createdAt = Column(DateTime, default=datetime.utcnow)
     updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class SystemSettingORM(Base):
+    __tablename__ = "system_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+
 class UserORM(Base):
     __tablename__ = "users"
 

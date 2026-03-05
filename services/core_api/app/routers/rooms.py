@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 from app.models import Room
 from app.models_orm import RoomORM
 from app.database import get_db
+from app.auth import require_permission
 
 router = APIRouter()
 
-@router.post("/rooms", response_model=Room)
+@router.post("/rooms", response_model=Room, dependencies=[Depends(require_permission("rooms","create"))])
 def create_room(r: Room, db: Session = Depends(get_db)):
     if not r.id:
         r.id = str(uuid4())
@@ -29,19 +30,19 @@ def create_room(r: Room, db: Session = Depends(get_db)):
     db.refresh(db_room)
     return Room(**db_room.__dict__)
 
-@router.get("/rooms", response_model=List[Room])
+@router.get("/rooms", response_model=List[Room], dependencies=[Depends(require_permission("rooms","read"))])
 def list_rooms(db: Session = Depends(get_db)):
     rooms = db.query(RoomORM).all()
     return [Room(**r.__dict__) for r in rooms]
 
-@router.get("/rooms/{room_id}", response_model=Room)
+@router.get("/rooms/{room_id}", response_model=Room, dependencies=[Depends(require_permission("rooms","read"))])
 def get_room(room_id: str, db: Session = Depends(get_db)):
     room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     return Room(**room.__dict__)
 
-@router.put("/rooms/{room_id}", response_model=Room)
+@router.put("/rooms/{room_id}", response_model=Room, dependencies=[Depends(require_permission("rooms","update"))])
 def update_room(room_id: str, r: Room, db: Session = Depends(get_db)):
     room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
     if not room:
@@ -59,7 +60,7 @@ def update_room(room_id: str, r: Room, db: Session = Depends(get_db)):
     db.refresh(room)
     return Room(**room.__dict__)
 
-@router.delete("/rooms/{room_id}")
+@router.delete("/rooms/{room_id}", dependencies=[Depends(require_permission("rooms","delete"))])
 def delete_room(room_id: str, db: Session = Depends(get_db)):
     room = db.query(RoomORM).filter(RoomORM.id == room_id).first()
     if not room:
