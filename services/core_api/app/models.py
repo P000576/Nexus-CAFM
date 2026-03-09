@@ -4,8 +4,16 @@ from pydantic import BaseModel
 class IdModel(BaseModel):
     id: str
 
+class Portfolio(BaseModel):
+    id: Optional[str]
+    name: str
+    description: Optional[str]
+    landAreaSqm: Optional[float]
+    customMetadata: Optional[dict] = {}
+
 class Building(BaseModel):
     id: Optional[str]
+    portfolioId: Optional[str]
     name: str
     address: Optional[str]
     grossAreaSqm: Optional[float]
@@ -28,6 +36,13 @@ class Room(BaseModel):
     department: Optional[str]
     customMetadata: Optional[dict] = {}
 
+class Desk(BaseModel):
+    id: Optional[str]
+    roomId: str
+    deskNumber: Optional[str]
+    type: Optional[str] = "desk"  # desk, office, collaboration, huddle
+    status: Optional[str] = "available"  # available, occupied, maintenance
+
 class Employee(BaseModel):
     id: Optional[str]
     firstName: str
@@ -37,6 +52,16 @@ class Employee(BaseModel):
     department: Optional[str]
     role: Optional[str]
     assignedRoomId: Optional[str]
+
+class Occupancy(BaseModel):
+    id: Optional[str]
+    employeeId: str
+    deskId: Optional[str]
+    roomId: str
+    assignmentDate: str  # ISO 8601 format
+    releaseDate: Optional[str]  # ISO 8601 format
+    status: Optional[str] = "assigned"  # assigned, unassigned, on_leave
+    notes: Optional[str]
 
 class Asset(BaseModel):
     id: Optional[str]

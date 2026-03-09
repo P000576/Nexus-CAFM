@@ -40,3 +40,34 @@ The API will be available at `http://localhost:8000` with auto-generated docs at
 - Database file: `nexus.db` (auto-created on first run)
 - Schema is created automatically on startup
 - Can be easily migrated to PostgreSQL/MySQL by changing `DATABASE_URL`
+
+## Epic 2: Space & Occupancy Management
+
+The API now supports hierarchical space inventory and employee occupancy tracking.
+
+### New Endpoints
+
+- **Portfolios** (`/portfolios`) – top-level containers for buildings
+  - CRUD operations with permission checks
+  - Hierarchy view: `GET /portfolios/{id}/hierarchy` returns nested buildings, floors, rooms, desks and current occupancies
+- **Desks** (`/desks`) – workstations within rooms
+  - Filter by room using query parameter `?room_id=`
+- **Occupancies** (`/occupancies`) – employee assignments to desks or rooms
+  - Flexible filtering by employee, desk, room or status
+  - Prevents duplicate active assignments
+
+### Testing
+
+Comprehensive tests have been added for the new modules:
+- `tests/test_portfolios.py`
+- `tests/test_desks.py`
+- `tests/test_occupancies.py`
+
+Run them with `pytest` from the `services/core_api` directory:
+
+```bash
+pytest -v
+```
+
+Make sure the virtual environment is active and dependencies installed before running.
+

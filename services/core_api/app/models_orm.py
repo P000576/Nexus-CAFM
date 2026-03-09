@@ -18,15 +18,32 @@ role_permission_association = Table(
     Column('permission_id', String, ForeignKey('permissions.id')),
 )
 
+class PortfolioORM(Base):
+    __tablename__ = "portfolios"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    landAreaSqm = Column(Float, nullable=True)
+    customMetadata = Column(String, nullable=True)  # JSON stored as string
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    buildings = relationship("BuildingORM", back_populates="portfolio")
+
 class BuildingORM(Base):
     __tablename__ = "buildings"
 
     id = Column(String, primary_key=True)
+    portfolioId = Column(String, ForeignKey("portfolios.id"), nullable=True)
     name = Column(String, nullable=False)
     address = Column(String, nullable=True)
     grossAreaSqm = Column(Float, nullable=True)
     customMetadata = Column(String, nullable=True)  # JSON stored as string
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    portfolio = relationship("PortfolioORM", back_populates="buildings")
     floors = relationship("FloorORM", back_populates="building")
 
 class FloorORM(Base):
@@ -52,8 +69,25 @@ class RoomORM(Base):
     capacity = Column(Integer, nullable=True)
     department = Column(String, nullable=True)
     customMetadata = Column(String, nullable=True)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     floor = relationship("FloorORM", back_populates="rooms")
+    desks = relationship("DeskORM", back_populates="room")
+
+class DeskORM(Base):
+    __tablename__ = "desks"
+
+    id = Column(String, primary_key=True)
+    roomId = Column(String, ForeignKey("rooms.id"), nullable=False)
+    deskNumber = Column(String, nullable=True)  # e.g., "A1", "A2"
+    type = Column(String, default="desk")  # desk, office, collaboration, huddle
+    status = Column(String, default="available")  # available, occupied, maintenance
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    room = relationship("RoomORM", back_populates="desks")
+    occupancies = relationship("OccupancyORM", back_populates="desk")
 
 class EmployeeORM(Base):
     __tablename__ = "employees"
@@ -66,6 +100,28 @@ class EmployeeORM(Base):
     department = Column(String, nullable=True)
     role = Column(String, nullable=True)
     assignedRoomId = Column(String, ForeignKey("rooms.id"), nullable=True)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    occupancies = relationship("OccupancyORM", back_populates="employee")
+
+class OccupancyORM(Base):
+    __tablename__ = "occupancies"
+
+    id = Column(String, primary_key=True)
+    employeeId = Column(String, ForeignKey("employees.id"), nullable=False)
+    deskId = Column(String, ForeignKey("desks.id"), nullable=True)  # Specific workstation
+    roomId = Column(String, ForeignKey("rooms.id"), nullable=False)  # Broader room assignment
+    assignmentDate = Column(DateTime, nullable=False)
+    releaseDate = Column(DateTime, nullable=True)
+    status = Column(String, default="assigned")  # assigned, unassigned, on_leave
+    notes = Column(String, nullable=True)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    updatedAt = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    employee = relationship("EmployeeORM", back_populates="occupancies")
+    desk = relationship("DeskORM", back_populates="occupancies")
+    room = relationship("RoomORM")
 
 class AssetORM(Base):
     __tablename__ = "assets"

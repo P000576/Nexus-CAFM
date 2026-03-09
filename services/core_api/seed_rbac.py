@@ -17,7 +17,7 @@ def seed_permissions():
         db.query(PermissionORM).delete()
         db.commit()
         
-        modules = ["buildings", "floors", "rooms", "employees", "assets", "workorders", "users", "roles", "permissions", "settings"]
+        modules = ["buildings", "floors", "rooms", "employees", "assets", "workorders", "users", "roles", "permissions", "settings", "portfolios", "desks", "occupancies"]
         actions = ["create", "read", "update", "delete"]
         
         permissions = []
@@ -52,7 +52,7 @@ def seed_roles():
             {
                 "name": "Self-Service",
                 "description": "Basic employee access - desk/room booking, service requests",
-                "permissions": ["rooms:read", "employees:read", "workorders:create"]
+                "permissions": ["rooms:read", "employees:read", "workorders:create", "desks:read"]
             },
             {
                 "name": "Work Process",
@@ -60,7 +60,8 @@ def seed_roles():
                 "permissions": [
                     "buildings:read", "floors:read", "rooms:read", "rooms:update",
                     "employees:read", "assets:read", "assets:update",
-                    "workorders:read", "workorders:create", "workorders:update"
+                    "workorders:read", "workorders:create", "workorders:update",
+                    "desks:read"
                 ]
             },
             {
@@ -88,7 +89,10 @@ def seed_roles():
                     "users:create", "users:read", "users:update", "users:delete",
                     "roles:create", "roles:read", "roles:update", "roles:delete",
                     "permissions:create", "permissions:read", "permissions:update", "permissions:delete",
-                    "settings:create", "settings:read", "settings:update", "settings:delete"
+                    "settings:create", "settings:read", "settings:update", "settings:delete",
+                    "portfolios:create", "portfolios:read", "portfolios:update", "portfolios:delete",
+                    "desks:create", "desks:read", "desks:update", "desks:delete",
+                    "occupancies:create", "occupancies:read", "occupancies:update", "occupancies:delete"
                 ]
             }
         ]

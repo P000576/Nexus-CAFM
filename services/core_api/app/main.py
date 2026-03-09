@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import buildings, floors, rooms, employees, assets, workorders, users, roles, permissions, settings
+from app.routers import buildings, floors, rooms, employees, assets, workorders, users, roles, permissions, settings, portfolios, desks, occupancies
 from app.database import init_db
 
 app = FastAPI(
@@ -23,6 +23,9 @@ app.include_router(users.router)
 app.include_router(roles.router)
 app.include_router(permissions.router)
 app.include_router(settings.router)
+app.include_router(portfolios.router)
+app.include_router(desks.router)
+app.include_router(occupancies.router)
 
 @app.get("/")
 def read_root():

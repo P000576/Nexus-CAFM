@@ -1,23 +1,22 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 from sqlalchemy.orm import Session
 
-from app.models import Permission, PermissionCreate
-from app.models_orm import PermissionORM
+from app import models
 from app.database import get_db
 
 router = APIRouter()
 
-@router.post("/permissions", response_model=Permission)
-def create_permission(p: PermissionCreate, db: Session = Depends(get_db)):
+@router.post("/permissions", response_model=models.Permission)
+def create_permission(p: models.PermissionCreate, db: Session = Depends(get_db)):
     # Check if permission already exists
-    existing = db.query(PermissionORM).filter(PermissionORM.name == p.name).first()
+    existing = db.query(models.PermissionORM).filter(models.PermissionORM.name == p.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Permission name already exists")
     
     permission_id = str(uuid4())
-    db_permission = PermissionORM(
+    db_permission = models.PermissionORM(
         id=permission_id,
         name=p.name,
         description=p.description,
@@ -28,28 +27,29 @@ def create_permission(p: PermissionCreate, db: Session = Depends(get_db)):
     db.add(db_permission)
     db.commit()
     db.refresh(db_permission)
-    return Permission(**db_permission.__dict__)
+    return models.Permission(**db_permission.__dict__)
 
-@router.get("/permissions", response_model=List[Permission])
-def list_permissions(module: str = None, action: str = None, db: Session = Depends(get_db)):
-    query = db.query(PermissionORM)
+@router.get("/permissions", response_model=List[models.Permission])
+
+def list_permissions(module: Optional[str] = None, action: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(models.PermissionORM)
     if module:
-        query = query.filter(PermissionORM.module == module)
+        query = query.filter(models.PermissionORM.module == module)
     if action:
-        query = query.filter(PermissionORM.action == action)
+        query = query.filter(models.PermissionORM.action == action)
     permissions = query.all()
-    return [Permission(**p.__dict__) for p in permissions]
+    return [models.Permission(**p.__dict__) for p in permissions]
 
-@router.get("/permissions/{permission_id}", response_model=Permission)
+@router.get("/permissions/{permission_id}", response_model=models.Permission)
 def get_permission(permission_id: str, db: Session = Depends(get_db)):
-    permission = db.query(PermissionORM).filter(PermissionORM.id == permission_id).first()
+    permission = db.query(models.PermissionORM).filter(models.PermissionORM.id == permission_id).first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
-    return Permission(**permission.__dict__)
+    return models.Permission(**permission.__dict__)
 
-@router.put("/permissions/{permission_id}", response_model=Permission)
-def update_permission(permission_id: str, p: PermissionCreate, db: Session = Depends(get_db)):
-    permission = db.query(PermissionORM).filter(PermissionORM.id == permission_id).first()
+@router.put("/permissions/{permission_id}", response_model=models.Permission)
+def update_permission(permission_id: str, p: models.PermissionCreate, db: Session = Depends(get_db)):
+    permission = db.query(models.PermissionORM).filter(models.PermissionORM.id == permission_id).first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
     
@@ -61,11 +61,11 @@ def update_permission(permission_id: str, p: PermissionCreate, db: Session = Dep
     
     db.commit()
     db.refresh(permission)
-    return Permission(**permission.__dict__)
+    return models.Permission(**permission.__dict__)
 
 @router.delete("/permissions/{permission_id}")
 def delete_permission(permission_id: str, db: Session = Depends(get_db)):
-    permission = db.query(PermissionORM).filter(PermissionORM.id == permission_id).first()
+    permission = db.query(models.PermissionORM).filter(models.PermissionORM.id == permission_id).first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
     db.delete(permission)
