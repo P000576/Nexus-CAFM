@@ -30,7 +30,3 @@ app.include_router(occupancies.router)
 @app.get("/")
 def read_root():
     return {"message": "Project Nexus Core API", "docs": "/docs"}
-
-@app.get("/")
-def read_root():
-    return {"message": "Project Nexus Core API", "docs": "/docs"}

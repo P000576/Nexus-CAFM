@@ -15,12 +15,17 @@ def create_building(b: Building, db: Session = Depends(get_db)):
     if not b.id:
         b.id = str(uuid4())
     
+    existing = db.query(BuildingORM).filter(BuildingORM.name == b.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Building name already exists")
+    
     db_building = BuildingORM(
         id=b.id,
+        portfolioId=b.portfolioId,
         name=b.name,
         address=b.address,
         grossAreaSqm=b.grossAreaSqm,
-        metadata=str(b.metadata) if b.metadata else None
+        customMetadata=str(b.customMetadata) if b.customMetadata else None
     )
     db.add(db_building)
     db.commit()

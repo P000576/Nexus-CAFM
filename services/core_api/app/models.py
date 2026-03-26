@@ -5,41 +5,41 @@ class IdModel(BaseModel):
     id: str
 
 class Portfolio(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     name: str
-    description: Optional[str]
-    landAreaSqm: Optional[float]
-    customMetadata: Optional[dict] = {}
+    description: Optional[str] = None
+    landAreaSqm: Optional[float] = None
+    customMetadata: Optional[dict] = None
 
 class Building(BaseModel):
-    id: Optional[str]
-    portfolioId: Optional[str]
+    id: Optional[str] = None
+    portfolioId: Optional[str] = None
     name: str
-    address: Optional[str]
-    grossAreaSqm: Optional[float]
-    customMetadata: Optional[dict] = {}
+    address: Optional[str] = None
+    grossAreaSqm: Optional[float] = None
+    customMetadata: Optional[dict] = None
 
 class Floor(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     buildingId: str
     level: str
-    grossAreaSqm: Optional[float]
-    planFileUrl: Optional[str]
+    grossAreaSqm: Optional[float] = None
+    planFileUrl: Optional[str] = None
 
 class Room(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     floorId: str
     name: str
-    number: Optional[str]
-    areaSqm: Optional[float]
-    capacity: Optional[int]
-    department: Optional[str]
-    customMetadata: Optional[dict] = {}
+    number: Optional[str] = None
+    areaSqm: Optional[float] = None
+    capacity: Optional[int] = None
+    department: Optional[str] = None
+    customMetadata: Optional[dict] = None
 
 class Desk(BaseModel):
-    id: Optional[str]
+    id: Optional[str] = None
     roomId: str
-    deskNumber: Optional[str]
+    deskNumber: Optional[str] = None
     type: Optional[str] = "desk"  # desk, office, collaboration, huddle
     status: Optional[str] = "available"  # available, occupied, maintenance
 

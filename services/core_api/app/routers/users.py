@@ -13,6 +13,17 @@ from app.auth import verify_password, hash_password, create_access_token, get_cu
 router = APIRouter()
 
 
+@router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """Authenticate user and return JWT token."""
+    user = db.query(UserORM).filter(UserORM.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.passwordHash):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    access_token = create_access_token(data={"sub": user.id})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 @router.post("/users", response_model=User)
 def create_user(u: UserCreate, db: Session = Depends(get_db), current_user: UserORM = Depends(get_current_user)):
     # Check if user already exists

@@ -23,8 +23,11 @@ def create_portfolio(p: Portfolio, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Portfolio name already exists")
     
+    if not p.id:
+        p.id = str(uuid.uuid4())
+    
     db_portfolio = PortfolioORM(
-        id=str(uuid.uuid4()),
+        id=p.id,
         name=p.name,
         description=p.description,
         landAreaSqm=p.landAreaSqm,

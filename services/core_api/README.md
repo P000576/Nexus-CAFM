@@ -55,6 +55,7 @@ The API now supports hierarchical space inventory and employee occupancy trackin
 - **Occupancies** (`/occupancies`) – employee assignments to desks or rooms
   - Flexible filtering by employee, desk, room or status
   - Prevents duplicate active assignments
+  - Bulk import: `POST /occupancies/bulk-import` accepts CSV file with columns: EmployeeID,DeskID,RoomID,AssignmentDate,Status,Notes
 
 ### Testing
 
